@@ -1,6 +1,2 @@
 # RockPaperScissors
-uses K nearest Neighbour to play rock paper scissors against a computer
-
-recognises images using k nearest neighbour
-
-testing testing
+This program uses pyagame to access the users camera and applies K nearest neighbour on each frame to decide which option the user is using.
