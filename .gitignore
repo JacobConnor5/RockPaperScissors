@@ -1,5 +1,7 @@
 .pickle
-.jpg
+*.task
 /Scissors
 /Rock
 /Paper
+/venv
+*.jpg
