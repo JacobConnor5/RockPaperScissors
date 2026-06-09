@@ -1,8 +1,11 @@
-.pickle
+*.pickle
 *.task
 /Scissors
 /Rock
 /Paper
+/Scissor
+/Rocks
+/Papers
 /venv
 *.ini
 *.jpg
