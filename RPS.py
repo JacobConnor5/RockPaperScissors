@@ -49,9 +49,6 @@ def train():
 
 	feat=np.array(flat_data_arr)
 
-	print(flat_data_arr)
-	print(feat)
-
 	label=np.array(target_arr)
 
 	feat_train,feat_test,label_train,label_test = sklearn.model_selection.train_test_split(feat,label,test_size = 0.1)

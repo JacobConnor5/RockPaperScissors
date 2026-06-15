@@ -3,8 +3,14 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import numpy as np
+import pickle
 import time
 
+def saved_model():
+	temp = open('Rock.pickle','rb')
+	model = pickle.load(temp)
+	
+	return model
 
 def draw_landmarks_on_image(rgb_image, detection_result):
     hand_landmarks_list = detection_result.hand_landmarks
@@ -47,7 +53,18 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 
     return annotated_image
 
-def main():
+def imageProccesing(img):
+    if len(img.shape) == 3:
+        flat = img.flatten()
+
+    else:
+        flat = img.flatten()
+
+    ready = np.expand_dims(flat,axis = 0)
+    return ready
+
+
+def main(model):
     while True:
         attempt = 0 #if camera takes too long it will fail so attempt adds a failsafe 
         success,img = cap.read()
@@ -65,6 +82,15 @@ def main():
         detectionResults = detector.detect(mp_image)
 
         annotatedImage = draw_landmarks_on_image(mp_image.numpy_view(),detectionResults)
+        resized = cv2.resize(annotatedImage,(150,150))
+        resized = np.array(resized)
+  
+        resized = resized.reshape(resized.shape[0],-1)
+        resized = imageProccesing(resized)
+        #clean this the fuck up
+
+        prediction = model.predict(resized)
+        print("We Predict: ",CATEGORIES[prediction[0]])
 
         cv2.imshow("Image",annotatedImage)
 
@@ -79,6 +105,7 @@ mp_hands = mp.tasks.vision.HandLandmarksConnections
 mp_drawing = mp.tasks.vision.drawing_utils
 mp_drawing_styles = mp.tasks.vision.drawing_styles
 
+CATEGORIES = ["Rock","Paper","Scissors"]
 MARGIN = 10  # pixels
 FONT_SIZE = 1
 FONT_THICKNESS = 1
@@ -95,7 +122,8 @@ cap = cv2.VideoCapture(0)
 cap.set(3,1280)
 cap.set(4,720) #setting the size of the capture 3 is the index for width and 4 is the index for height
 
+model = saved_model()
 
 if __name__=="__main__":
-    main()
+    main(model)
     

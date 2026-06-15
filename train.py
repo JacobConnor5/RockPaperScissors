@@ -40,7 +40,6 @@ for i in Categories:
         detection_result = main.detector.detect(image)
         #print(annotated_image)
         #Fall back to the raw image if no landmarks detected
-        print("test",os.path.join(path,img))
         raw_numpy = image.numpy_view().copy()
         
         if detection_result.hand_landmarks:  # or face_landmarks / pose_landmarks depending on your model
@@ -58,10 +57,11 @@ for i in Categories:
 
 print(type(dataArr))
 feat = np.array(dataArr)
+print(feat[0],"\ndone")
 feat = feat.reshape(feat.shape[0], -1)
 label=np.array(target_arr)
-print(label)
-
+print(feat[0],"\ndone")
+print(len(feat[0]))
 feat_train,feat_test,label_train,label_test = sklearn.model_selection.train_test_split(feat,label,test_size = 0.1)
 
 model = KNeighborsClassifier(n_neighbors=3)
