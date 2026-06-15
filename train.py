@@ -13,8 +13,6 @@ from mediapipe.tasks.python import vision
 import time
 import main
 
-print("testing")
-
 
 mp_hands = mp.tasks.vision.HandLandmarksConnections
 mp_drawing = mp.tasks.vision.drawing_utils
