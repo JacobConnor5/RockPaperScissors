@@ -10,7 +10,6 @@ def draw_landmarks_on_image(rgb_image, detection_result):
     hand_landmarks_list = detection_result.hand_landmarks
     handedness_list = detection_result.handedness
     annotated_image = np.copy(rgb_image)
-    croppedImage = np.copy(rgb_image)
 
     # Loop through the detected hands to visualize.
     for idx in range(len(hand_landmarks_list)):
@@ -30,10 +29,10 @@ def draw_landmarks_on_image(rgb_image, detection_result):
         xCoordinates = [landmark.x for landmark in hand_landmarks]
         yCoordinates = [landmark.y for landmark in hand_landmarks]
 
-        minX = int(min(xCoordinates)*width)
-        minY = int(min(yCoordinates)*height)
-        maxX = int(max(xCoordinates)*width)
-        maxY = int(max(yCoordinates)*height)
+        minX = max(int(min(xCoordinates)*width),0)
+        minY = max(int(min(yCoordinates)*height),0)
+        maxX = min(int(max(xCoordinates)*width),1280)
+        maxY = min(int(max(yCoordinates)*height),720)
 
         text_x = int(min(xCoordinates) * width)
         text_y = int(min(yCoordinates) * height) - MARGIN
@@ -43,9 +42,10 @@ def draw_landmarks_on_image(rgb_image, detection_result):
         #             (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX,
         #             FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv2.LINE_AA)
         cv2.rectangle(annotated_image,(minX,minY),(maxX,maxY),(0,255,0),2)
-        croppedImage = annotated_image[minY:maxY,minX:maxX]
 
-    return croppedImage
+        annotated_image = annotated_image[minY:maxY,minX:maxX]
+
+    return annotated_image
 
 def main():
     while True:
@@ -61,7 +61,6 @@ def main():
 
         img = cv2.flip(img,1)
         rgb = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-        print(type(img))
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
         detectionResults = detector.detect(mp_image)
 
