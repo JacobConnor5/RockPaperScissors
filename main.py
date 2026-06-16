@@ -63,7 +63,6 @@ def imageProccesing(img):
     ready = np.expand_dims(flat,axis = 0)
     return ready
 
-
 def main():
     model = saved_model()
 
@@ -86,7 +85,6 @@ def main():
         annotatedImage = draw_landmarks_on_image(mp_image.numpy_view(),detectionResults)
         resized = cv2.resize(annotatedImage,(150,150))
         resized = np.array(resized)
-  
         resized = resized.reshape(resized.shape[0],-1)
         resized = imageProccesing(resized)
         #clean this the fuck up
