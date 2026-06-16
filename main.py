@@ -64,7 +64,9 @@ def imageProccesing(img):
     return ready
 
 
-def main(model):
+def main():
+    model = saved_model()
+
     while True:
         attempt = 0 #if camera takes too long it will fail so attempt adds a failsafe 
         success,img = cap.read()
@@ -122,8 +124,7 @@ cap = cv2.VideoCapture(0)
 cap.set(3,1280)
 cap.set(4,720) #setting the size of the capture 3 is the index for width and 4 is the index for height
 
-model = saved_model()
 
 if __name__=="__main__":
-    main(model)
+    main()
     
