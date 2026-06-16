@@ -65,7 +65,7 @@ def imageProccesing(img):
 
 def main():
     model = saved_model()
-
+    prediction = [0]
     while True:
         attempt = 0 #if camera takes too long it will fail so attempt adds a failsafe 
         success,img = cap.read()
@@ -82,14 +82,20 @@ def main():
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
         detectionResults = detector.detect(mp_image)
 
-        annotatedImage = draw_landmarks_on_image(mp_image.numpy_view(),detectionResults)
-        resized = cv2.resize(annotatedImage,(150,150))
-        resized = np.array(resized)
-        resized = resized.reshape(resized.shape[0],-1)
-        resized = imageProccesing(resized)
-        #clean this the fuck up
+        if detectionResults.hand_landmarks:
+            handLandmarks = detectionResults.hand_landmarks[0]
+            landmarks = []
+            for landmark in handLandmarks: 
+                landmarks.extend([landmark.x,landmark.y,landmark.z])
+            
+            if landmarks:
+                data = np.array(landmarks)
+                data = data.reshape(1,-1)
+                prediction = model.predict(data)
 
-        prediction = model.predict(resized)
+
+        annotatedImage = draw_landmarks_on_image(mp_image.numpy_view(),detectionResults)
+
         print("We Predict: ",CATEGORIES[prediction[0]])
 
         cv2.imshow("Image",annotatedImage)
