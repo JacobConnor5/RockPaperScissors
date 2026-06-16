@@ -4,6 +4,7 @@
 <li><del>More accurate way to record hands</del></li>
 <li><del>Update Training data so it is now in format of the hand detections<del></li>
 <li>Improve training data</li>
-<li>Update main files so that they estimate the hand gesture usin this new data format</li>
-<li></li>
+<li><del>Update main files so that they estimate the hand gesture usin this new data format<del></li>
+<li>Add the game implementation back i.e 3 2 1 etc</li>
+<li>Understand and comment code better</li>
 </ul>
