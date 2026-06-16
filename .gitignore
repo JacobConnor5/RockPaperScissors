@@ -1,5 +1,16 @@
-.pickle
-.jpg
-/Scissors
-/Rock
-/Paper
+# Python
+.venv/
+venv/
+*.pyc
+__pycache__/
+
+# Data folders
+/Rock*
+/Paper*
+/Scissor*
+
+# Files
+*.pickle
+*.task
+*.ini
+*.jpg
