@@ -94,12 +94,12 @@ def main():
                 data = scaler.transform(np.array(landmarks).reshape(1,-1))
                 prediction = model.predict(data)
 
-
         annotatedImage = draw_landmarks_on_image(mp_image.numpy_view(),detectionResults,prediction)
+        backToOrig = cv2.cvtColor(annotatedImage,cv2.COLOR_RGB2BGR)
 
         #print("We Predict: ",CATEGORIES[prediction[0]])
 
-        cv2.imshow("Image",annotatedImage)
+        cv2.imshow("Image",backToOrig)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
