@@ -80,6 +80,6 @@ for i in range(len(predictions)):
 print(acc)
 
 with open('Rock.pickle','wb') as pickle_file:
-    pickle.dump(model,pickle_file)
+    pickle.dump({"model":model,"scaler":scaler},pickle_file)
     pickle_file.close()
 

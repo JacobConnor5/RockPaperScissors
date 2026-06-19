@@ -7,12 +7,14 @@ import pickle
 import time
 
 def saved_model():
-	temp = open('Rock.pickle','rb')
-	model = pickle.load(temp)
-	
-	return model
+    temp = open('Rock.pickle','rb')
+    modelData = pickle.load(temp)
+    model = modelData['model']
+    scaler = modelData['scaler']
+    return model,scaler
 
-def draw_landmarks_on_image(rgb_image, detection_result):
+
+def draw_landmarks_on_image(rgb_image, detection_result,prediction):
     hand_landmarks_list = detection_result.hand_landmarks
     handedness_list = detection_result.handedness
     annotated_image = np.copy(rgb_image)
@@ -48,9 +50,9 @@ def draw_landmarks_on_image(rgb_image, detection_result):
         #             (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX,
         #             FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv2.LINE_AA)
         cv2.rectangle(annotated_image,(minX,minY),(maxX,maxY),(0,255,0),2)
+        cv2.putText(annotated_image,CATEGORIES[prediction[0]],(text_x,text_y),cv2.FONT_HERSHEY_SIMPLEX,FONT_SIZE,HANDEDNESS_TEXT_COLOR,FONT_THICKNESS,cv2.LINE_AA)
 
-        annotated_image = annotated_image[minY:maxY,minX:maxX]
-
+        annotated_image = annotated_image
     return annotated_image
 
 def imageProccesing(img):
@@ -64,7 +66,7 @@ def imageProccesing(img):
     return ready
 
 def main():
-    model = saved_model()
+    model,scaler = saved_model()
     prediction = [0]
     while True:
         attempt = 0 #if camera takes too long it will fail so attempt adds a failsafe 
@@ -89,14 +91,13 @@ def main():
                 landmarks.extend([landmark.x,landmark.y,landmark.z])
             
             if landmarks:
-                data = np.array(landmarks)
-                data = data.reshape(1,-1)
+                data = scaler.transform(np.array(landmarks).reshape(1,-1))
                 prediction = model.predict(data)
 
 
-        annotatedImage = draw_landmarks_on_image(mp_image.numpy_view(),detectionResults)
+        annotatedImage = draw_landmarks_on_image(mp_image.numpy_view(),detectionResults,prediction)
 
-        print("We Predict: ",CATEGORIES[prediction[0]])
+        #print("We Predict: ",CATEGORIES[prediction[0]])
 
         cv2.imshow("Image",annotatedImage)
 
