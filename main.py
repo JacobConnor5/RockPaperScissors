@@ -7,12 +7,14 @@ import pickle
 import time
 
 def saved_model():
-	temp = open('Rock.pickle','rb')
-	model = pickle.load(temp)
-	
-	return model
+    temp = open('Rock.pickle','rb')
+    modelData = pickle.load(temp)
+    model = modelData['model']
+    scaler = modelData['scaler']
+    return model,scaler
 
-def draw_landmarks_on_image(rgb_image, detection_result):
+
+def draw_landmarks_on_image(rgb_image, detection_result,prediction):
     hand_landmarks_list = detection_result.hand_landmarks
     handedness_list = detection_result.handedness
     annotated_image = np.copy(rgb_image)
@@ -48,9 +50,9 @@ def draw_landmarks_on_image(rgb_image, detection_result):
         #             (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX,
         #             FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv2.LINE_AA)
         cv2.rectangle(annotated_image,(minX,minY),(maxX,maxY),(0,255,0),2)
+        cv2.putText(annotated_image,CATEGORIES[prediction[0]],(text_x,text_y),cv2.FONT_HERSHEY_SIMPLEX,FONT_SIZE,HANDEDNESS_TEXT_COLOR,FONT_THICKNESS,cv2.LINE_AA)
 
-        annotated_image = annotated_image[minY:maxY,minX:maxX]
-
+        annotated_image = annotated_image
     return annotated_image
 
 def imageProccesing(img):
@@ -64,8 +66,8 @@ def imageProccesing(img):
     return ready
 
 def main():
-    model = saved_model()
-
+    model,scaler = saved_model()
+    prediction = [0]
     while True:
         attempt = 0 #if camera takes too long it will fail so attempt adds a failsafe 
         success,img = cap.read()
@@ -82,17 +84,22 @@ def main():
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
         detectionResults = detector.detect(mp_image)
 
-        annotatedImage = draw_landmarks_on_image(mp_image.numpy_view(),detectionResults)
-        resized = cv2.resize(annotatedImage,(150,150))
-        resized = np.array(resized)
-        resized = resized.reshape(resized.shape[0],-1)
-        resized = imageProccesing(resized)
-        #clean this the fuck up
+        if detectionResults.hand_landmarks:
+            handLandmarks = detectionResults.hand_landmarks[0]
+            landmarks = []
+            for landmark in handLandmarks: 
+                landmarks.extend([landmark.x,landmark.y,landmark.z])
+            
+            if landmarks:
+                data = scaler.transform(np.array(landmarks).reshape(1,-1))
+                prediction = model.predict(data)
 
-        prediction = model.predict(resized)
-        print("We Predict: ",CATEGORIES[prediction[0]])
+        annotatedImage = draw_landmarks_on_image(mp_image.numpy_view(),detectionResults,prediction)
+        backToOrig = cv2.cvtColor(annotatedImage,cv2.COLOR_RGB2BGR)
 
-        cv2.imshow("Image",annotatedImage)
+        #print("We Predict: ",CATEGORIES[prediction[0]])
+
+        cv2.imshow("Image",backToOrig)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

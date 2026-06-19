@@ -5,7 +5,7 @@ from skimage.transform import resize
 from skimage.io import imread
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
-# STEP 1: Import the necessary modules.
+from sklearn.preprocessing import StandardScaler
 import cv2
 import mediapipe as mp
 from mediapipe.tasks import python
@@ -38,30 +38,38 @@ for i in Categories:
         #img_resized=resize(img_array,(150,150,3))
 
         detection_result = main.detector.detect(image)
-        #print(annotated_image)
-        #Fall back to the raw image if no landmarks detected
-        raw_numpy = image.numpy_view().copy()
+        handLandmarks = detection_result.hand_landmarks[0]
+        landmarks = []
+        for landmark in handLandmarks:
+            landmarks.extend([landmark.x,landmark.y,landmark.z])
         
-        if detection_result.hand_landmarks:  # or face_landmarks / pose_landmarks depending on your model
-            annotated_image = main.draw_landmarks_on_image(raw_numpy, detection_result)
-        else:
-            annotated_image = raw_numpy  # use original if nothing detected
+        dataArr.append(landmarks)
+        target_arr.append(Categories.index(i))
+
+        # raw_numpy = image.numpy_view().copy()
+        
+        # if detection_result.hand_landmarks:  # or face_landmarks / pose_landmarks depending on your model
+        #     annotated_image = main.draw_landmarks_on_image(raw_numpy, detection_result)
+        # else:
+        #     annotated_image = raw_numpy  # use original if nothing detected
         
         
-        resizedImg = cv2.resize(annotated_image, (150, 150))
-        dataArr.append(resizedImg) 
+        #resizedImg = cv2.resize(annotated_image, (150, 150))
 
         # dataArr.append(annotated_image.tolist())
-        target_arr.append(Categories.index(i))
     print(f'loaded category:{i} successfully')
 
 feat = np.array(dataArr)
-feat = feat.reshape(feat.shape[0], -1)
+# feat = feat.reshape(feat.shape[0], -1)
 label=np.array(target_arr)
-feat_train,feat_test,label_train,label_test = sklearn.model_selection.train_test_split(feat,label,test_size = 0.1)
 
+scaler = StandardScaler()
+featScaled = scaler.fit_transform(feat)
+
+feat_train,feat_test,label_train,label_test = sklearn.model_selection.train_test_split(featScaled,label,test_size = 0.1)
 
 model = KNeighborsClassifier(n_neighbors=3)
+
 model.fit(feat_train,label_train)
 acc = model.score(feat_test,label_test)
 predictions = model.predict(feat_test)
@@ -72,6 +80,6 @@ for i in range(len(predictions)):
 print(acc)
 
 with open('Rock.pickle','wb') as pickle_file:
-    pickle.dump(model,pickle_file)
+    pickle.dump({"model":model,"scaler":scaler},pickle_file)
     pickle_file.close()
 

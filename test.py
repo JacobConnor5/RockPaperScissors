@@ -5,6 +5,7 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import numpy as np
 import time
+import main
 
 mp_hands = mp.tasks.vision.HandLandmarksConnections
 mp_drawing = mp.tasks.vision.drawing_utils
@@ -23,10 +24,19 @@ options = vision.HandLandmarkerOptions(base_options=base_options,
 detector = vision.HandLandmarker.create_from_options(options)
 
 # STEP 3: Load the input image.
-image = mp.Image.create_from_file("testImages/1.jpg")
+
+image = mp.Image.create_from_file("Rock\WIN_20260615_12_34_40_Pro (2).jpg")
 
 # STEP 4: Detect hand landmarks from the input image.
 detection_result = detector.detect(image)
 print(detection_result)
 # STEP 5: Process the classification result. In this case, visualize it.
-annotated_image = draw_landmarks_on_image(image.numpy_view(), detection_result)
+annotated_image = main.draw_landmarks_on_image(image.numpy_view(), detection_result)
+
+while True:
+    cv2.imshow("myImage",annotated_image)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+
