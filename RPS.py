@@ -133,10 +133,9 @@ def camera(model):
 		win.blit(countdown,(w/2,h/2))
 		pygame.display.flip()
 		
-		#if x == 4:
+		if x == 4:
 
-			
-			#start = play(prediction)
+			start = play(prediction)
 
 
 def play(prediction):

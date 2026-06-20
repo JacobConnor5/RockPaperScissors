@@ -5,6 +5,7 @@ from mediapipe.tasks.python import vision
 import numpy as np
 import pickle
 import time
+import random
 
 def saved_model():
     temp = open('Rock.pickle','rb')
@@ -12,7 +13,6 @@ def saved_model():
     model = modelData['model']
     scaler = modelData['scaler']
     return model,scaler
-
 
 def draw_landmarks_on_image(rgb_image, detection_result,prediction):
     hand_landmarks_list = detection_result.hand_landmarks
@@ -65,9 +65,32 @@ def imageProccesing(img):
     ready = np.expand_dims(flat,axis = 0)
     return ready
 
+def play(prediction):
+    choice = random.randint(0,2)
+    time.sleep(1)
+    print('You chose',CATEGORIES[prediction[0]])
+    time.sleep(1)
+    print('I chose',CATEGORIES[choice])
+
+    if choice == prediction+1 or (choice==0 and prediction==2):
+       print('You lose')
+       score[1][1] += 1
+
+    elif prediction == choice+1 or (prediction == 0 and choice == 2):
+       print('Well done',name, 'you won')
+       score[0][1] += 1
+
+    start_time =time.time()
+
+    return start_time
+
 def main():
     model,scaler = saved_model()
     prediction = [0]
+    start = time.time()
+    current = time.time()
+    count = ['ROCK','PAPER','SCISSORS','GO','']
+
     while True:
         attempt = 0 #if camera takes too long it will fail so attempt adds a failsafe 
         success,img = cap.read()
@@ -78,6 +101,12 @@ def main():
         if not success:
             print("failed to read frame")
             break
+        
+        current = time.time()
+        difference = round(current - start)
+
+        if difference <0 or difference>4:
+            difference=0
 
         img = cv2.flip(img,1)
         rgb = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
@@ -98,8 +127,12 @@ def main():
         backToOrig = cv2.cvtColor(annotatedImage,cv2.COLOR_RGB2BGR)
 
         #print("We Predict: ",CATEGORIES[prediction[0]])
+        cv2.putText(backToOrig,count[difference],(0,360),cv2.FONT_HERSHEY_SIMPLEX,FONT_SIZE,HANDEDNESS_TEXT_COLOR,FONT_THICKNESS,cv2.LINE_AA)
 
         cv2.imshow("Image",backToOrig)
+
+        if difference == 4:
+            start = play(prediction)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -111,6 +144,9 @@ def main():
 mp_hands = mp.tasks.vision.HandLandmarksConnections
 mp_drawing = mp.tasks.vision.drawing_utils
 mp_drawing_styles = mp.tasks.vision.drawing_styles
+
+name = input('what is your name')
+score = [[name,0],['CPU',0]]
 
 CATEGORIES = ["Rock","Paper","Scissors"]
 MARGIN = 10  # pixels
